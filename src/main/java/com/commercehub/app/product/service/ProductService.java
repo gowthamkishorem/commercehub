@@ -74,8 +74,36 @@ import java.util.List;
         response.setQuantity(product.getQuantity());
 
         return response;
+
+
     }
 
+    public ProductResponse updateProduct(Long id, ProductRequest request) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
+
+        product.setName(request.getName());
+        product.setDescription(request.getDescription());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
+
+        Product updatedProduct = productRepository.save(product);
+
+        ProductResponse response = new ProductResponse();
+
+        response.setId(updatedProduct.getId());
+        response.setName(updatedProduct.getName());
+        response.setDescription(updatedProduct.getDescription());
+        response.setPrice(updatedProduct.getPrice());
+        response.setQuantity(updatedProduct.getQuantity());
+
+        return response;
+    }
 
 
 }
