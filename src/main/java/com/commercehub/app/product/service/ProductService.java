@@ -104,6 +104,16 @@ import java.util.List;
 
         return response;
     }
+    public void deleteProduct(Long id) {
 
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
+
+        productRepository.delete(product);
+    }
 
 }

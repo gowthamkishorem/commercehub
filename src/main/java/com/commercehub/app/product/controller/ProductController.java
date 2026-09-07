@@ -4,6 +4,7 @@ import com.commercehub.app.product.dto.ProductResponse;
 import com.commercehub.app.product.dto.ProductRequest;
 import com.commercehub.app.product.entity.Product;
 import com.commercehub.app.product.service.ProductService;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -40,5 +41,12 @@ public class ProductController {
             @RequestBody ProductRequest request) {
 
         return productService.updateProduct(id, request);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteProduct(@PathVariable Long id) {
+
+        productService.deleteProduct(id);
     }
 }
