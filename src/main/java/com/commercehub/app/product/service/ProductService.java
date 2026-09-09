@@ -4,6 +4,7 @@ import com.commercehub.app.common.exception.ProductNotFoundException;
 import com.commercehub.app.product.dto.ProductResponse;
 import com.commercehub.app.product.dto.ProductRequest;
 import com.commercehub.app.product.entity.Product;
+import com.commercehub.app.product.mapper.ProductMapper;
 import com.commercehub.app.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
 
@@ -13,50 +14,30 @@ import java.util.List;
     public class ProductService {
 
         private final ProductRepository productRepository;
+    private final ProductMapper productMapper;
 
-        public ProductService(ProductRepository productRepository) {
-            this.productRepository = productRepository;
-        }
+    public ProductService(
+            ProductRepository productRepository,
+            ProductMapper productMapper) {
+
+        this.productRepository = productRepository;
+        this.productMapper = productMapper;
+    }
 
     public ProductResponse createProduct(ProductRequest request) {
 
-        // 1. Convert DTO -> Entity
-        Product product = new Product();
+        Product product = productMapper.toEntity(request);
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
-
-        // 2. Save Entity
         Product savedProduct = productRepository.save(product);
 
-        // 3. Convert Entity -> Response DTO
-        ProductResponse response = new ProductResponse();
-
-        response.setId(savedProduct.getId());
-        response.setName(savedProduct.getName());
-        response.setDescription(savedProduct.getDescription());
-        response.setPrice(savedProduct.getPrice());
-        response.setQuantity(savedProduct.getQuantity());
-
-        return response;
+        return productMapper.toResponse(savedProduct);
     }
+
     public List<ProductResponse> getProducts() {
 
         return productRepository.findAll()
                 .stream()
-                .map(product -> {
-                    ProductResponse response = new ProductResponse();
-
-                    response.setId(product.getId());
-                    response.setName(product.getName());
-                    response.setDescription(product.getDescription());
-                    response.setPrice(product.getPrice());
-                    response.setQuantity(product.getQuantity());
-
-                    return response;
-                })
+                .map(productMapper :: toResponse)
                 .toList();
     }
 
@@ -87,22 +68,12 @@ import java.util.List;
                         )
                 );
 
-        product.setName(request.getName());
-        product.setDescription(request.getDescription());
-        product.setPrice(request.getPrice());
-        product.setQuantity(request.getQuantity());
+        productMapper.updateEntity(product, request);
 
         Product updatedProduct = productRepository.save(product);
 
-        ProductResponse response = new ProductResponse();
+        return productMapper.toResponse(updatedProduct);
 
-        response.setId(updatedProduct.getId());
-        response.setName(updatedProduct.getName());
-        response.setDescription(updatedProduct.getDescription());
-        response.setPrice(updatedProduct.getPrice());
-        response.setQuantity(updatedProduct.getQuantity());
-
-        return response;
     }
     public void deleteProduct(Long id) {
 
@@ -115,5 +86,7 @@ import java.util.List;
 
         productRepository.delete(product);
     }
+
+
 
 }

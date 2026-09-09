@@ -4,6 +4,7 @@ import com.commercehub.app.product.dto.ProductResponse;
 import com.commercehub.app.product.dto.ProductRequest;
 import com.commercehub.app.product.entity.Product;
 import com.commercehub.app.product.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,7 +21,9 @@ public class ProductController {
     }
 
     @PostMapping
-    public ProductResponse createProduct(@RequestBody ProductRequest request) {
+    public ProductResponse createProduct(
+            @Valid @RequestBody ProductRequest request) {
+
         return productService.createProduct(request);
     }
 
@@ -38,7 +41,7 @@ public class ProductController {
     @PutMapping("/{id}")
     public ProductResponse updateProduct(
             @PathVariable Long id,
-            @RequestBody ProductRequest request) {
+            @Valid @RequestBody ProductRequest request) {
 
         return productService.updateProduct(id, request);
     }

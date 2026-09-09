@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.Instant;
+import java.util.Map;
 
 @Getter
 @Setter
@@ -14,6 +15,7 @@ public class ErrorResponse {
     private String error;
     private String message;
     private String path;
+    private Map<String, String> fieldErrors;
 
     public ErrorResponse(
             Instant timestamp,
