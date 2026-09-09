@@ -1,5 +1,7 @@
 package com.commercehub.app.product.service;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import com.commercehub.app.common.exception.ProductNotFoundException;
 import com.commercehub.app.product.dto.ProductResponse;
 import com.commercehub.app.product.dto.ProductRequest;
@@ -7,8 +9,10 @@ import com.commercehub.app.product.entity.Product;
 import com.commercehub.app.product.mapper.ProductMapper;
 import com.commercehub.app.product.repository.ProductRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
     public class ProductService {
@@ -16,6 +20,8 @@ import java.util.List;
         private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
+    private static final Set<String> ALLOWED_SORT_FIELDS =
+            Set.of("id", "name", "price", "quantity");
     public ProductService(
             ProductRepository productRepository,
             ProductMapper productMapper) {
@@ -33,12 +39,33 @@ import java.util.List;
         return productMapper.toResponse(savedProduct);
     }
 
-    public List<ProductResponse> getProducts() {
+    public Page<ProductResponse> getProducts(
+            int page,
+            int size,
+            String sortBy,
+            String direction) {
 
-        return productRepository.findAll()
-                .stream()
-                .map(productMapper :: toResponse)
-                .toList();
+        if (!ALLOWED_SORT_FIELDS.contains(sortBy)) {
+            throw new IllegalArgumentException(
+                    "Invalid sort field: " + sortBy
+            );
+        }
+        if (!direction.equalsIgnoreCase("asc")
+                && !direction.equalsIgnoreCase("desc")) {
+
+            throw new IllegalArgumentException(
+                    "Invalid sort direction: " + direction
+            );
+        }
+
+        Sort sort = direction.equalsIgnoreCase("desc")
+                ? Sort.by(sortBy).descending()
+                : Sort.by(sortBy).ascending();
+
+        Pageable pageable = PageRequest.of(page, size, sort);
+
+        return productRepository.findAll(pageable)
+                .map(productMapper::toResponse);
     }
 
     public ProductResponse getProductById(Long id) {
